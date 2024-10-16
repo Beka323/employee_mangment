@@ -30,12 +30,10 @@ export class CompanyService {
             };
             return members;
         });
-
         return { member: formattedMember };
     }
     async findCompany(id: string): Promise<company> {
         const foundCompany = await this.companyModel.findById(id);
-
         return foundCompany;
     }
     async registerCompany(
