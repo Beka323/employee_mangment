@@ -37,8 +37,10 @@ export class UsersService {
             throw new ConflictException("Email already exisist");
         }
     }
+    // Find user byI id
     async findUserById(id: number): Promise<FoundUser> {
         const user = await this.userModel.findById(id);
+        
         user.password = "";
         return user;
     }

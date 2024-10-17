@@ -1,4 +1,8 @@
-import { Injectable, ConflictException } from "@nestjs/common";
+import {
+    Injectable,
+    ConflictException,
+    ForbiddenException
+} from "@nestjs/common";
 import { Model } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
 import { Company } from "./schema/company.schema";
@@ -57,6 +61,12 @@ export class CompanyService {
         userid: string;
     }): Promise<{ msg: string }> {
         const checkExist = await this.findCompany(param.id);
+        const findUser = await this.usersService.findUserById(
+            Object(param.userid)
+        );
+        if (findUser.companyname !== checkExist.companyname) {
+            throw new ForbiddenException(" not allowed");
+        }
         if (checkExist.members.includes(param.userid)) {
             throw new ConflictException("user exist in member");
         }
@@ -71,6 +81,7 @@ export class CompanyService {
         addMember.save();
         return { msg: "added" };
     }
+
     async removeMember(param: {
         id: string;
         userid: string;

@@ -28,6 +28,6 @@ export class ProjectGuard implements CanActivate {
     }
     private extractToken(req: Request): string | undefined {
         const [type, token] = req.headers?.authorization.split(" ") ?? [];
-        return type == "Bearer " ? token : undefined;
+        return type == "Bearer" ? token : undefined;
     }
 }
