@@ -1,4 +1,15 @@
+# project mangnent app for companys
 
-This app build with nestjs a progressive nodejs freamwork 
+### This app build in nestjs a progressive nodejs freamework that help you to create scalable application 
 
-more details soon
+## first install the dependencies 
+```
+$ npm install 
+```
+```
+$ npm run dev
+```
+The above command start the nestjs server 
+
+
+
