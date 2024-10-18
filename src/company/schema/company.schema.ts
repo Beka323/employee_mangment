@@ -10,11 +10,13 @@ export class Company {
     companyname: string;
     @Prop({ type: String })
     description: string;
-    @Prop({ type: Object })
+    @Prop({ type: String })
     createdBy: string;
     @Prop({ type: String })
     companyadmin: string;
     @Prop([String])
     members: string[];
+    @Prop([String])
+    projects: string[];
 }
 export const CompanySchema = SchemaFactory.createForClass(Company);

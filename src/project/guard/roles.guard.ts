@@ -10,7 +10,6 @@ export class RolesGuard implements CanActivate {
         const roles = this.reflector.get(Roles, context.getHandler());
         const role = req?.user.roleone;
         const matchRole = role.some(role => roles.includes(role));
-        console.log(matchRole);
         if (!matchRole) {
             return matchRole;
         }

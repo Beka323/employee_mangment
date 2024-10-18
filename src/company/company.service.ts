@@ -12,9 +12,10 @@ import { UsersService } from "../users/users.service";
 interface company {
     companyname: string;
     description: string;
-    createdBy: string;
+    createdBy: Object;
     companyadmin: string;
     members: string[];
+    projects:string[];
 }
 @Injectable()
 export class CompanyService {
@@ -37,8 +38,17 @@ export class CompanyService {
         return { member: formattedMember };
     }
     async findCompany(id: string): Promise<company> {
-        const foundCompany = await this.companyModel.findById(id);
+        const foundCompany = await this.companyModel.findById(id).exec();
         return foundCompany;
+    }
+    // Finding company by admin
+    async findByAdmin(id: string): Promise<any> {
+        const company = await this.companyModel
+            .findOne({
+                createdBy: id
+            })
+            .exec();
+        return company;
     }
     async registerCompany(
         company: CompanyDto,
@@ -55,6 +65,18 @@ export class CompanyService {
         const createCompany = new this.companyModel(registerCompany);
         createCompany.save();
         return { msg: "company register" };
+    }
+    // Add Project to comapny
+    async addProjectToCompany(id: Object, projectId: string) {
+        const addProject = await this.companyModel.findOneAndUpdate(
+            { _id: Object(id) },
+            {
+                $push: {
+                    projects: projectId
+                }
+            }
+        );
+        addProject.save()
     }
     async addMember(param: {
         id: string;
