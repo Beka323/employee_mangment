@@ -15,7 +15,7 @@ interface company {
     createdBy: Object;
     companyadmin: string;
     members: string[];
-    projects:string[];
+    projects: string[];
 }
 @Injectable()
 export class CompanyService {
@@ -76,7 +76,18 @@ export class CompanyService {
                 }
             }
         );
-        addProject.save()
+        addProject.save();
+    }
+    async removeProject(id: string, adminId: string) {
+        const removeProject = await this.companyModel.findOneAndUpdate(
+            { createdBy: adminId },
+            {
+                $pull: {
+                    projects: id
+                }
+            }
+        );
+      removeProject.save()
     }
     async addMember(param: {
         id: string;

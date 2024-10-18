@@ -69,7 +69,10 @@ export class ProjectController {
     @UseGuards(RolesGuard)
     @Roles(["ADMIN"])
     @Delete(":id")
-    async cancleProject(@Param("id") id: string) {
-      // come back to this
+    async cancleProject(
+        @Param("id") id: string,
+        @Req() req
+    ): Promise<{ msg: string }> {
+        return this.projectService.cancleProject(id, req.user.id);
     }
 }

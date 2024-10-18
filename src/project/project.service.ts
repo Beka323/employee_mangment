@@ -122,4 +122,10 @@ export class ProjectService {
         removeTask.save();
         return { msg: "removed" };
     }
+    async cancleProject(id: string, adminId: string): Promise<{ msg: string }> {
+        await this.companyService.removeProject(id, adminId);
+        const deleteProject = await this.projectModel.deleteOne({_id:Object(id)})
+
+        return { msg: "removed" };
+    }
 }
