@@ -4,6 +4,6 @@ export class AdminDto{
   lastname:string;
   email:string;
   password:string;
-  roleone:string[];
+  roleone:string;
   companyname:string;
 }

@@ -9,6 +9,7 @@ import { Company } from "./schema/company.schema";
 import { CompanyDto } from "./dto/company.dto";
 import { userDto } from "../users/dto/user.dto";
 import { UsersService } from "../users/users.service";
+
 interface company {
     companyname: string;
     description: string;
@@ -23,6 +24,8 @@ export class CompanyService {
         @InjectModel(Company.name) private companyModel: Model<Company>,
         private usersService: UsersService
     ) {}
+
+    //,Find All Members
     async findAll(id: string): Promise<any> {
         const allMembers = await this.companyModel.findById(id);
         const members = await this.usersService.findAll(allMembers.members);
@@ -37,6 +40,7 @@ export class CompanyService {
         });
         return { member: formattedMember };
     }
+    //,Find single company
     async findCompany(id: string): Promise<company> {
         const foundCompany = await this.companyModel.findById(id).exec();
         return foundCompany;
@@ -50,10 +54,13 @@ export class CompanyService {
             .exec();
         return company;
     }
+    // chcek if the user has a company
+    // TODO take the use id from req and check it if it exisist on the members
+    // Register
     async registerCompany(
         company: CompanyDto,
         req: any
-    ): Promise<{ msg: string }> {
+    ): Promise<{ msg: string; companyName: string }> {
         const currentUser = await this.usersService.findUserById(req.user.id);
         const registerCompany = {
             companyname: company.name,
@@ -64,7 +71,10 @@ export class CompanyService {
         };
         const createCompany = new this.companyModel(registerCompany);
         createCompany.save();
-        return { msg: "company register" };
+        return {
+            msg: "company register",
+            companyName: createCompany.companyname
+        };
     }
     // Add Project to comapny
     async addProjectToCompany(id: Object, projectId: string) {
@@ -78,6 +88,7 @@ export class CompanyService {
         );
         addProject.save();
     }
+    // Remove project from comapny
     async removeProject(id: string, adminId: string) {
         const removeProject = await this.companyModel.findOneAndUpdate(
             { createdBy: adminId },
@@ -87,8 +98,9 @@ export class CompanyService {
                 }
             }
         );
-      removeProject.save()
+        removeProject.save();
     }
+    // add member
     async addMember(param: {
         id: string;
         userid: string;
@@ -114,7 +126,7 @@ export class CompanyService {
         addMember.save();
         return { msg: "added" };
     }
-
+    // Remove members
     async removeMember(param: {
         id: string;
         userid: string;

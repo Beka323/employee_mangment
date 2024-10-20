@@ -10,7 +10,7 @@ export class AuthService {
     async createNewUser(user: userDto): Promise<{ msg: string } | any> {
         return this.usersService.createNewUser(user);
     }
-    async loginUser(user: loginDto): Promise<{ token: string }> {
+    async loginUser(user: loginDto): Promise<{ token: string,roles:string[] }> {
         return this.usersService.login(user);
     }
     async createAdmin(admin: AdminDto):Promise<{msg:string} | any> {

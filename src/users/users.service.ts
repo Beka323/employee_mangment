@@ -40,14 +40,12 @@ export class UsersService {
     // Find user byI id
     async findUserById(id: number): Promise<FoundUser> {
         const user = await this.userModel.findById(id);
-        
-        user.password = "";
+       user.password = "";
         return user;
     }
     async findAll(memberId: string[]): Promise<FoundUser[]> {
-        const allUser = await this.userModel
-            .find({ _id: { $in: memberId } })
-            
+        const allUser = await this.userModel.find({ _id: { $in: memberId } });
+
         return allUser;
     }
     async createNewUser(user: userDto): Promise<{ msg: string } | any> {
@@ -68,11 +66,12 @@ export class UsersService {
         newUser.save();
         return { msg: "successfully created" };
     }
-    async login(user: loginDto): Promise<{ token: string }> {
+    async login(user: loginDto): Promise<{ token: string; roles: string[] }> {
         const foundUser = await this.userModel
             .findOne({ username: user.username })
             .exec();
-        if (!foundUser) {9
+        if (!foundUser) {
+            9;
             throw new NotFoundException("user not found");
         }
         const match = await bcrypt.compare(user.password, foundUser.password);
@@ -85,7 +84,7 @@ export class UsersService {
         };
         const token = await this.jwtService.signAsync(payload);
 
-        return { token };
+        return { token, roles: foundUser.roleone };
     }
     async createAdminUser(admin: AdminDto): Promise<{ msg: string } | any> {
         await this.findUser(admin);
