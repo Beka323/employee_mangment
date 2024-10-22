@@ -12,6 +12,7 @@ import { loginDto } from "../users/dto/login.dto";
 import { AdminDto } from "../users/dto/admin.dto";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Express } from "express";
+import { FileValidation } from "./validation/validation.pipe";
 
 @Controller("auth")
 export class AuthController {
@@ -34,9 +35,21 @@ export class AuthController {
     ): Promise<{ msg: string } | any> {
         return this.authService.createAdmin(admin);
     }
+    // uploading file
+
     @Post("upload")
     @UseInterceptors(FileInterceptor("image"))
-    upload(@UploadedFile() image: Express.Multer.File): { msg: string } {
+    async upload(
+        @UploadedFile(FileValidation) image: Express.Multer.File
+    ): Promise<{ msg: string }> {
         return this.authService.fileUpload(image);
+    }
+    @Post("files")
+    @UseInterceptors(FileInterceptor("file"))
+    async fileUpload(
+        @UploadedFile("file") file: Express.Multer.File
+    ): Promise<{ msg: string }> {
+      console.log(file)
+        return { msg: "file uploaded" };
     }
 }

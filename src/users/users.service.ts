@@ -5,6 +5,7 @@ import {
     BadRequestException
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
+
 import { Model } from "mongoose";
 import * as bcrypt from "bcryptjs";
 import { loginDto } from "./dto/login.dto";
@@ -12,7 +13,6 @@ import { JwtService } from "@nestjs/jwt";
 import { User } from "./schema/user.schema";
 import { userDto } from "./dto/user.dto";
 import { AdminDto } from "./dto/admin.dto";
-
 interface FoundUser {
     _id: Object;
     username: string;
@@ -40,7 +40,7 @@ export class UsersService {
     // Find user byI id
     async findUserById(id: number): Promise<FoundUser> {
         const user = await this.userModel.findById(id);
-       user.password = "";
+        user.password = "";
         return user;
     }
     async findAll(memberId: string[]): Promise<FoundUser[]> {
