@@ -7,7 +7,8 @@ import {
     Req,
     Param,
     Patch,
-    Delete
+    Delete,
+    Query
 } from "@nestjs/common";
 import { CompanyService } from "./company.service";
 import { CompanyGuard } from "./guard/company.guard";
@@ -16,17 +17,33 @@ import { CompanyDto } from "./dto/company.dto";
 import { Roles } from "./decorator/role.decorator";
 import { RoleGuard } from "./guard/role.guard";
 
+interface company {
+    companyname: string;
+    description: string;
+    createdBy: Object;
+    companyadmin: string;
+    members: string[];
+    projects: string[];
+}
+
 @UseGuards(CompanyGuard)
 @Controller("company")
 export class CompanyController {
     constructor(private companyService: CompanyService) {}
     // Find memebers
-
-    @Get("user/company")
-    async findUserCompany(@Req() req) {}
     @Get("members/:id")
     async getAll(@Param("id") id: string): Promise<any> {
         return this.companyService.findAll(id);
+    }
+    @Get("find/:id")
+    async findCompany(@Param("id") id: string): Promise<company> {
+        return this.companyService.findCompany(id);
+    }
+    @Get("exisit")
+    async checkExsistance(
+        @Req() req
+    ): Promise<{ msg: string; status: boolean; data?: company }> {
+        return this.companyService.checkExsistance(req.user.id);
     }
     // Register companys
     @UseGuards(RoleGuard)

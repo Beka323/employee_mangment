@@ -4,16 +4,24 @@ import { userDto } from "../users/dto/user.dto";
 import { loginDto } from "../users/dto/login.dto";
 import { AdminDto } from "../users/dto/admin.dto";
 
+import { Express } from "express";
 @Injectable()
 export class AuthService {
     constructor(private usersService: UsersService) {}
     async createNewUser(user: userDto): Promise<{ msg: string } | any> {
         return this.usersService.createNewUser(user);
     }
-    async loginUser(user: loginDto): Promise<{ token: string,roles:string[] }> {
+    async loginUser(
+        user: loginDto
+    ): Promise<{ token: string; roles: string[] }> {
         return this.usersService.login(user);
     }
-    async createAdmin(admin: AdminDto):Promise<{msg:string} | any> {
-       return this.usersService.createAdminUser(admin);
+    async createAdmin(admin: AdminDto): Promise<{ msg: string } | any> {
+        return this.usersService.createAdminUser(admin);
+    }
+    fileUpload(image: Express.Multer.File): { msg: string } {
+        console.log(image);
+        console.log("bonjure");
+        return { msg: "successfully uploaded" };
     }
 }

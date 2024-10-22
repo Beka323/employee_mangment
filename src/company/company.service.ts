@@ -54,9 +54,24 @@ export class CompanyService {
             .exec();
         return company;
     }
-    // chcek if the user has a company
-    // TODO take the use id from req and check it if it exisist on the members
-    // Register
+
+    // check if the user is found is company
+    async checkExsistance(
+        id: string
+    ): Promise<{ msg: string; status: boolean; data?: company }> {
+        const check = await this.findByAdmin(id);
+        if (!check) {
+            const findByMember = await this.companyModel.findOne({
+                members: id
+            });
+            if (!findByMember) {
+                return { msg: "not found", status: false, data: null };
+            }
+            return { msg: "found", status: true, data: findByMember };
+        }
+        return { msg: "found", status: true, data: check };
+    }
+
     async registerCompany(
         company: CompanyDto,
         req: any
