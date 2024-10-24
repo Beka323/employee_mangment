@@ -91,9 +91,10 @@ export class CompanyService {
                 id: user._id,
                 firstname: user.firstname,
                 lastname: user.lastname,
-                img: user.secureImgUrl,
+                image: user.secureImgUrl,
                 imgUrl: user.imgUrl,
-                cpname:user.companyname
+                cpname:user.companyname,
+                role:user.roleone
             };
             return users;
         });
