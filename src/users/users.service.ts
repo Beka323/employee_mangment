@@ -24,6 +24,7 @@ interface FoundUser {
     password: string;
     roleone: string[];
     companyname: string;
+    secureImgUrl: string;
 }
 @Injectable()
 export class UsersService {
@@ -39,6 +40,10 @@ export class UsersService {
         if (findUser) {
             throw new ConflictException("Email already exisist");
         }
+    }
+    async findUserByComapnyname(name: string): Promise<any> {
+        const users = await this.userModel.find({ companyname: name }).exec();
+        return users
     }
     // Find user byI id
     async findUserById(id: number): Promise<FoundUser> {
@@ -100,7 +105,7 @@ export class UsersService {
         image: Express.Multer.File
     ): Promise<{ msg: string } | any> {
         await this.findUser(admin);
-        const result = await this.uploadService.uploadImage(image)
+        const result = await this.uploadService.uploadImage(image);
         const salt = await bcrypt.genSalt(10);
         const hashPwd = await bcrypt.hash(admin.password, salt);
         const adminUser = {
@@ -111,8 +116,8 @@ export class UsersService {
             password: hashPwd,
             roleone: ["ADMIN", admin.roleone],
             companyname: admin.companyname,
-            secureImgUrl:result.secure_url,
-            imgUrl:result.url
+            secureImgUrl: result.secure_url,
+            imgUrl: result.url
         };
         const createAdmin = new this.userModel(adminUser);
         createAdmin.save();

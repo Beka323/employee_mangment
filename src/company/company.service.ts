@@ -34,7 +34,9 @@ export class CompanyService {
                 id: member._id,
                 username: member.username,
                 firstname: member.firstname,
-                lastname: member.lastname
+                lastname: member.lastname,
+                image: member.secureImgUrl,
+                role: member.roleone
             };
             return members;
         });
@@ -42,7 +44,7 @@ export class CompanyService {
     }
     //,Find single company
     async findCompany(id: string): Promise<company> {
-        const foundCompany = await this.companyModel.findById(id).exec();
+        const foundCompany = await this.companyModel.findById(id);
         return foundCompany;
     }
     // Finding company by admin
@@ -71,11 +73,37 @@ export class CompanyService {
         }
         return { msg: "found", status: true, data: check };
     }
+    // Suggest users
+    async suggestion(id: string): Promise<any> {
+        const findCompany = await this.findCompany(id);
 
+        const users = await this.usersService.findUserByComapnyname(
+            findCompany.companyname
+        );
+        const filterUser = users.filter(
+            user => user._id.toString() !== findCompany.createdBy
+        );
+        const suggestion = filterUser.filter(
+            user => !findCompany.members.includes(user._id.toString())
+        );
+        const formatSuggestion = suggestion.map(user => {
+            const users = {
+                id: user._id,
+                firstname: user.firstname,
+                lastname: user.lastname,
+                img: user.secureImgUrl,
+                imgUrl: user.imgUrl,
+                cpname:user.companyname
+            };
+            return users;
+        });
+        return formatSuggestion;
+    }
+    // Register company
     async registerCompany(
         company: CompanyDto,
         req: any
-    ): Promise<{ msg: string; companyName: string }> {
+    ): Promise<{ msg: string; companyName: string; comId: string }> {
         const currentUser = await this.usersService.findUserById(req.user.id);
         const registerCompany = {
             companyname: company.name,
@@ -88,7 +116,8 @@ export class CompanyService {
         createCompany.save();
         return {
             msg: "company register",
-            companyName: createCompany.companyname
+            companyName: createCompany.companyname,
+            comId: createCompany._id.toString()
         };
     }
     // Add Project to comapny

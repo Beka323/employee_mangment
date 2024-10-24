@@ -45,6 +45,12 @@ export class CompanyController {
     ): Promise<{ msg: string; status: boolean; data?: company }> {
         return this.companyService.checkExsistance(req.user.id);
     }
+    @UseGuards(RoleGuard)
+    @Roles(["ADMIN"])
+    @Get("suggest/user/:id")
+    async suggest(@Param("id") id: string):Promise<any> {
+      return this.companyService.suggestion(id)
+    }
     // Register companys
     @UseGuards(RoleGuard)
     @Roles(["ADMIN"])
@@ -52,7 +58,7 @@ export class CompanyController {
     async registerCompany(
         @Body() body: CompanyDto,
         @Req() req: Request
-    ): Promise<{ msg: string; companyName: string }> {
+    ): Promise<{ msg: string; companyName: string; comId: string }> {
         return this.companyService.registerCompany(body, req);
     }
     // Add member
