@@ -13,6 +13,8 @@ import { JwtService } from "@nestjs/jwt";
 import { User } from "./schema/user.schema";
 import { userDto } from "./dto/user.dto";
 import { AdminDto } from "./dto/admin.dto";
+import { UploadService } from "../upload/upload.service";
+import { Express } from "express";
 interface FoundUser {
     _id: Object;
     username: string;
@@ -27,7 +29,8 @@ interface FoundUser {
 export class UsersService {
     constructor(
         @InjectModel(User.name) private userModel: Model<User>,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private uploadService: UploadService
     ) {}
     async findUser(user) {
         const findUser = await this.userModel
@@ -48,8 +51,12 @@ export class UsersService {
 
         return allUser;
     }
-    async createNewUser(user: userDto): Promise<{ msg: string } | any> {
+    async createNewUser(
+        user: userDto,
+        image: Express.Multer.File
+    ): Promise<{ msg: string } | any> {
         await this.findUser(user);
+        const result = await this.uploadService.uploadImage(image);
         const salt = await bcrypt.genSalt(10);
         const hashPwd = await bcrypt.hash(user.password, salt);
 
@@ -60,7 +67,9 @@ export class UsersService {
             email: user.email,
             password: hashPwd,
             roleone: ["USER", user.roleone],
-            companyname: user.companyname
+            companyname: user.companyname,
+            secureImgUrl: result.secure_url,
+            imgUrl: result.url
         };
         const newUser = new this.userModel(createUser);
         newUser.save();
@@ -86,8 +95,12 @@ export class UsersService {
 
         return { token, roles: foundUser.roleone };
     }
-    async createAdminUser(admin: AdminDto): Promise<{ msg: string } | any> {
+    async createAdminUser(
+        admin: AdminDto,
+        image: Express.Multer.File
+    ): Promise<{ msg: string } | any> {
         await this.findUser(admin);
+        const result = await this.uploadService.uploadImage(image)
         const salt = await bcrypt.genSalt(10);
         const hashPwd = await bcrypt.hash(admin.password, salt);
         const adminUser = {
@@ -97,7 +110,9 @@ export class UsersService {
             email: admin.email,
             password: hashPwd,
             roleone: ["ADMIN", admin.roleone],
-            companyname: admin.companyname
+            companyname: admin.companyname,
+            secureImgUrl:result.secure_url,
+            imgUrl:result.url
         };
         const createAdmin = new this.userModel(adminUser);
         createAdmin.save();

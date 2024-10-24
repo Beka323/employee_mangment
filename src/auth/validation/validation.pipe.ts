@@ -8,7 +8,7 @@ import {
 @Injectable()
 export class FileValidation implements PipeTransform {
     transform(value: any, metadata: ArgumentMetadata): any {
-        let oneKb = 100000;
+        let oneKb = 1000000;
         if (value.size > oneKb) {
             throw new BadRequestException("too large file");
         }

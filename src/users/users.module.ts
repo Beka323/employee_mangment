@@ -7,6 +7,7 @@ import { JwtModule } from "@nestjs/jwt";
 
 import { UsersController } from "./users.controller";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { UploadModule } from "../upload/upload.module";
 @Module({
     imports: [
         MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
@@ -17,7 +18,8 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
                 secret: configService.get<string>("JWT_SECRET")
             }),
             inject: [ConfigService]
-        })
+        }),
+        UploadModule
     ],
     providers: [UsersService],
     exports: [UsersService],

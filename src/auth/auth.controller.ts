@@ -14,14 +14,17 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { Express } from "express";
 import { FileValidation } from "./validation/validation.pipe";
 
+
 @Controller("auth")
 export class AuthController {
     constructor(private authService: AuthService) {}
     @Post("register")
+    @UseInterceptors(FileInterceptor("image"))
     async createNew(
-        @Body(ValidationPipe) user: userDto
+        @Body() user: userDto,
+        @UploadedFile(FileValidation) image: Express.Multer.File
     ): Promise<{ msg: string } | any> {
-        return this.authService.createNewUser(user);
+        return this.authService.createNewUser(user, image);
     }
     @Post("login")
     async login(
@@ -30,26 +33,11 @@ export class AuthController {
         return this.authService.loginUser(user);
     }
     @Post("admin")
-    async createAdmin(
-        @Body(ValidationPipe) admin: AdminDto
-    ): Promise<{ msg: string } | any> {
-        return this.authService.createAdmin(admin);
-    }
-    // uploading file
-
-    @Post("upload")
     @UseInterceptors(FileInterceptor("image"))
-    async upload(
+    async createAdmin(
+        @Body() admin: AdminDto,
         @UploadedFile(FileValidation) image: Express.Multer.File
-    ): Promise<{ msg: string }> {
-        return this.authService.fileUpload(image);
-    }
-    @Post("files")
-    @UseInterceptors(FileInterceptor("file"))
-    async fileUpload(
-        @UploadedFile("file") file: Express.Multer.File
-    ): Promise<{ msg: string }> {
-      console.log(file)
-        return { msg: "file uploaded" };
+    ): Promise<{ msg: string } | any> {
+        return this.authService.createAdmin(admin,image);
     }
 }
