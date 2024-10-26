@@ -13,6 +13,7 @@ import { JwtService } from "@nestjs/jwt";
 import { User } from "./schema/user.schema";
 import { userDto } from "./dto/user.dto";
 import { AdminDto } from "./dto/admin.dto";
+import { updateUserDto } from "./dto/update.dto";
 import { UploadService } from "../upload/upload.service";
 import { Express } from "express";
 interface FoundUser {
@@ -43,7 +44,7 @@ export class UsersService {
     }
     async findUserByComapnyname(name: string): Promise<any> {
         const users = await this.userModel.find({ companyname: name }).exec();
-        return users
+        return users;
     }
     // Find user byI id
     async findUserById(id: number): Promise<FoundUser> {
@@ -122,5 +123,13 @@ export class UsersService {
         const createAdmin = new this.userModel(adminUser);
         createAdmin.save();
         return { msg: "successfully created" };
+    }
+    async editProfile(
+        user: updateUserDto,
+        id: string
+    ): Promise<{ msg: string; status: boolean }> {
+        const updateUser = await this.userModel.findByIdAndUpdate(id, user);
+        updateUser.save();
+        return { msg: "user profile updated", status: true };
     }
 }
