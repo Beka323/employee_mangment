@@ -45,25 +45,20 @@ export class CompanyController {
     ): Promise<{ msg: string; status: boolean; data?: company }> {
         return this.companyService.checkExsistance(req.user.id);
     }
-    @UseGuards(RoleGuard)
-    @Roles(["ADMIN"])
     @Get("suggest/user/:id")
-    async suggest(@Param("id") id: string):Promise<any> {
-      return this.companyService.suggestion(id)
+    async suggest(@Param("id") id: string): Promise<any> {
+        return this.companyService.suggestion(id);
     }
-    // Register companys
-    @UseGuards(RoleGuard)
-    @Roles(["ADMIN"])
+    // Register company
     @Post("register")
     async registerCompany(
         @Body() body: CompanyDto,
         @Req() req: Request
-    ): Promise<{ msg: string; companyName: string; comId: string }> {
+    ): Promise<{ msg: string; comInfo: { id: string; name: string } }> {
         return this.companyService.registerCompany(body, req);
     }
+
     // Add member
-    @UseGuards(RoleGuard)
-    @Roles(["ADMIN"])
     @Patch(":id/:userid")
     async addMember(
         @Param() param: { id: string; userid: string }
@@ -71,8 +66,6 @@ export class CompanyController {
         return this.companyService.addMember(param);
     }
     // remove member
-    @UseGuards(RoleGuard)
-    @Roles(["ADMIN"])
     @Delete(":id/:userid")
     async removeMember(
         @Param() param: { id: string; userid: string }

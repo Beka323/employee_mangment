@@ -7,10 +7,12 @@ import { UsersService } from "../users/users.service";
 import { CompanyService } from "../company/company.service";
 import { Request } from "express";
 interface ProjectType {
+    id: string;
     name: string;
     createdBy: string;
     progress: string;
     status: string;
+    tasks: { id: Object; body: string }[];
 }
 @Injectable()
 export class ProjectService {
@@ -26,10 +28,12 @@ export class ProjectService {
         });
         const formattedProject = projects.map(project => {
             const formatedPro = {
+                id: project._id.toString(),
                 name: project.name,
                 createdBy: project.createBy,
                 progress: project.progress,
-                status: project.status
+                status: project.status,
+                tasks: project.tasks
             };
             return formatedPro;
         });
@@ -124,7 +128,9 @@ export class ProjectService {
     }
     async cancleProject(id: string, adminId: string): Promise<{ msg: string }> {
         await this.companyService.removeProject(id, adminId);
-        const deleteProject = await this.projectModel.deleteOne({_id:Object(id)})
+        const deleteProject = await this.projectModel.deleteOne({
+            _id: Object(id)
+        });
 
         return { msg: "removed" };
     }

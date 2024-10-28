@@ -12,7 +12,6 @@ import { loginDto } from "./dto/login.dto";
 import { JwtService } from "@nestjs/jwt";
 import { User } from "./schema/user.schema";
 import { userDto } from "./dto/user.dto";
-import { AdminDto } from "./dto/admin.dto";
 import { updateUserDto } from "./dto/update.dto";
 import { UploadService } from "../upload/upload.service";
 import { Express } from "express";
@@ -23,9 +22,9 @@ interface FoundUser {
     lastname: string;
     email: string;
     password: string;
-    roleone: string[];
+    position: string;
     companyname: string;
-    secureImgUrl: string;
+    role: string;
 }
 @Injectable()
 export class UsersService {
@@ -34,19 +33,20 @@ export class UsersService {
         private jwtService: JwtService,
         private uploadService: UploadService
     ) {}
-    async findUser(user) {
-        const findUser = await this.userModel
-            .findOne({ email: user.email })
-            .exec();
+    // Find User By Email
+    async findUser(email) {
+        const findUser = await this.userModel.findOne({ email: email }).exec();
+
         if (findUser) {
             throw new ConflictException("Email already exisist");
         }
     }
+    // find user By Company name
     async findUserByComapnyname(name: string): Promise<any> {
         const users = await this.userModel.find({ companyname: name }).exec();
         return users;
     }
-    // Find user byI id
+    // Find user by id
     async findUserById(id: number): Promise<FoundUser> {
         const user = await this.userModel.findById(id);
         user.password = "";
@@ -57,72 +57,47 @@ export class UsersService {
 
         return allUser;
     }
-    async createNewUser(
-        user: userDto,
-        image: Express.Multer.File
-    ): Promise<{ msg: string } | any> {
-        await this.findUser(user);
-        const result = await this.uploadService.uploadImage(image);
-        const salt = await bcrypt.genSalt(10);
-        const hashPwd = await bcrypt.hash(user.password, salt);
+    // Register new User
+    async createNewUser(user: userDto): Promise<{ msg: string } | any> {
+        await this.findUser(user.email);
 
-        const createUser = {
-            username: user.username,
+        const genSalt = await bcrypt.genSalt(10);
+        const hashPwd = await bcrypt.hash(user.password, genSalt);
+        const newUser = {
             firstname: user.firstname,
             lastname: user.lastname,
+            username: user.username,
             email: user.email,
             password: hashPwd,
-            roleone: ["USER", user.roleone],
-            companyname: user.companyname,
-            secureImgUrl: result.secure_url,
-            imgUrl: result.url
+            position: user.position,
+            companyname: user.companyname
         };
-        const newUser = new this.userModel(createUser);
-        newUser.save();
+        const createUser = new this.userModel(newUser);
+        createUser.save();
+
         return { msg: "successfully created" };
     }
-    async login(user: loginDto): Promise<{ token: string; roles: string[] }> {
+    // User Login Method
+    async login(user: loginDto): Promise<{ token: string }> {
         const foundUser = await this.userModel
             .findOne({ username: user.username })
             .exec();
+
         if (!foundUser) {
-            9;
             throw new NotFoundException("user not found");
         }
+
         const match = await bcrypt.compare(user.password, foundUser.password);
         if (!match) {
             throw new BadRequestException("password doesn't match");
         }
         const payload = {
             id: foundUser.id,
-            roleone: foundUser.roleone
+            role: foundUser.role
         };
         const token = await this.jwtService.signAsync(payload);
-
-        return { token, roles: foundUser.roleone };
-    }
-    async createAdminUser(
-        admin: AdminDto,
-        image: Express.Multer.File
-    ): Promise<{ msg: string } | any> {
-        await this.findUser(admin);
-        const result = await this.uploadService.uploadImage(image);
-        const salt = await bcrypt.genSalt(10);
-        const hashPwd = await bcrypt.hash(admin.password, salt);
-        const adminUser = {
-            username: admin.username,
-            firstname: admin.firstname,
-            lastname: admin.lastname,
-            email: admin.email,
-            password: hashPwd,
-            roleone: ["ADMIN", admin.roleone],
-            companyname: admin.companyname,
-            secureImgUrl: result.secure_url,
-            imgUrl: result.url
-        };
-        const createAdmin = new this.userModel(adminUser);
-        createAdmin.save();
-        return { msg: "successfully created" };
+      
+        return { token };
     }
     async editProfile(
         user: updateUserDto,
@@ -131,5 +106,23 @@ export class UsersService {
         const updateUser = await this.userModel.findByIdAndUpdate(id, user);
         updateUser.save();
         return { msg: "user profile updated", status: true };
+    }
+    async assignRole(id: string): Promise<any> {
+        const findUser = await this.userModel.findOne({ _id: id });
+        if (!findUser) {
+            throw new NotFoundException("no user found");
+        }
+        findUser.role = "admin";
+        findUser.save();
+    }
+    async giveRole(
+        userId: string,
+        role: string
+    ): Promise<{ msg: string; status: boolean }> {
+        const findUser = await this.userModel.findById(userId);
+        console.log(findUser);
+        findUser.role = role;
+        findUser.save();
+        return { msg: "updated", status: true };
     }
 }

@@ -34,16 +34,14 @@ export class CompanyService {
                 id: member._id,
                 username: member.username,
                 firstname: member.firstname,
-                lastname: member.lastname,
-                image: member.secureImgUrl,
-                role: member.roleone
+                lastname: member.lastname
             };
             return members;
         });
         return { member: formattedMember };
     }
     //,Find single company
-    async findCompany(id: string): Promise<company> {
+    async findCompany(id: string): Promise<any> {
         const foundCompany = await this.companyModel.findById(id);
         return foundCompany;
     }
@@ -69,7 +67,7 @@ export class CompanyService {
             if (!findByMember) {
                 return { msg: "not found", status: false, data: null };
             }
-            return { msg: "found", status: true, data: findByMember };
+            return { msg: "found", status: true };
         }
         return { msg: "found", status: true, data: check };
     }
@@ -93,8 +91,8 @@ export class CompanyService {
                 lastname: user.lastname,
                 image: user.secureImgUrl,
                 imgUrl: user.imgUrl,
-                cpname:user.companyname,
-                role:user.roleone
+                cpname: user.companyname,
+                role: user.roleone
             };
             return users;
         });
@@ -104,21 +102,31 @@ export class CompanyService {
     async registerCompany(
         company: CompanyDto,
         req: any
-    ): Promise<{ msg: string; companyName: string; comId: string }> {
-        const currentUser = await this.usersService.findUserById(req.user.id);
-        const registerCompany = {
-            companyname: company.name,
+    ): Promise<{ msg: string; comInfo: { id: string; name: string } }> {
+        const findCompany = await this.companyModel
+            .findOne({
+                name: company.name
+            })
+            .exec();
+        if (findCompany) {
+            throw new ConflictException("company already registerd");
+        }
+        const findUser = await this.usersService.findUserById(req.user.id);
+        const newCompany = {
+            name: company.name,
             description: company.description,
-            createdBy: currentUser._id,
-            companyadmin: currentUser.username,
-            members: []
+            createdBy: findUser.username,
+            admin: findUser._id.toString()
         };
-        const createCompany = new this.companyModel(registerCompany);
+        const createCompany = await new this.companyModel(newCompany);
+        await this.usersService.assignRole(req.user.id);
         createCompany.save();
         return {
-            msg: "company register",
-            companyName: createCompany.companyname,
-            comId: createCompany._id.toString()
+            msg: "succesfully created",
+            comInfo: {
+                id: createCompany._id.toString(),
+                name: createCompany.name
+            }
         };
     }
     // Add Project to comapny

@@ -7,13 +7,13 @@ export type ComapnyDocument = HydratedDocument<Company>;
 })
 export class Company {
     @Prop({ type: String })
-    companyname: string;
+    name: string;
     @Prop({ type: String })
     description: string;
     @Prop({ type: String })
     createdBy: string;
     @Prop({ type: String })
-    companyadmin: string;
+    admin: string;
     @Prop([String])
     members: string[];
     @Prop([String])

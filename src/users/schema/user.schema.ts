@@ -17,8 +17,10 @@ export class User {
     email: string;
     @Prop({ type: String })
     password: string;
-    @Prop([String])
-    roleone: string[];
+    @Prop({ type: String })
+    position: string;
+    @Prop({ type: String, enum: ["admin", "user", "editor"], default: "user" })
+    role: string;
     @Prop({ type: String })
     companyname: string;
     @Prop({ type: String })

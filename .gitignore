@@ -4,6 +4,7 @@
 /build
 .env
 todo.md
+NEW.md
 # Logs
 logs
 *.log
